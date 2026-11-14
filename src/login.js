@@ -1,10 +1,10 @@
-// pw/login.js — login ke fomo.family (sekali saja) memakai profil Chrome bot
+// src/login.js — login ke fomo.family (sekali saja) memakai profil Chrome bot
 // Chrome dibuka BIASA (tanpa Playwright/remote debugging), karena Google menolak login
 // dari browser yang dikendalikan otomatis ("This browser or app may not be secure").
 // Sesi login tersimpan di browser.userDataDir dan dipakai bot saat jalan.
 const fs = require('fs');
 const { spawn } = require('child_process');
-const { loadPwConfig } = require('./config');
+const { loadPwConfig } = require('./core/config');
 
 const cfg = loadPwConfig();
 const { chromePath, userDataDir } = cfg.browser;

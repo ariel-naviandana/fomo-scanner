@@ -18,7 +18,14 @@ Config yang disimpan dari halaman pengaturan langsung dipakai bot (run di-restar
 ## Struktur
 ```
 fomo-scanner/
-├─ pw/                  kode bot (index, run, scanner = sell/AD, buyer = buy, ui, browser, config, login, util)
+├─ src/
+│  ├─ index.js          titik masuk: start | login | config
+│  ├─ login.js          login fomo (Chrome biasa, sekali saja)
+│  ├─ core/             config, util, browser, page-helper (x/text/wait), order-form (isi nominal + cek tombol Buy)
+│  ├─ sell-ad/          scanner (panel Your positions), sell, ad (+RSI), trail (trailing stop)
+│  ├─ buy/              buyer (watchlist, standby, beli, unstar)
+│  ├─ runner/           run (start/stop run, tab), schedule (cron / acak), watch-config (pantau config/)
+│  └─ config-ui/        server + page (halaman pengaturan)
 ├─ config/              general (jadwal, run, dryRun, output), sell-ad, buy, paths (selector), timing
 ├─ docs/
 │  ├─ guidance.md       panduan versi sekarang: config, scanner buy, format log

@@ -1,4 +1,4 @@
-// pw/util.js — waktu WIB, log, parsing angka, tulis CSV
+// src/core/util.js — waktu WIB, log, parsing angka, tulis CSV
 const fs = require('fs');
 const path = require('path');
 

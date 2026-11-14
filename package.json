@@ -1,13 +1,13 @@
 {
   "name": "fomo-scanner",
   "version": "1.0.0",
-  "main": "pw/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node pw/index.js",
-    "login": "node pw/index.js login",
-    "config": "node pw/index.js config",
-    "pw": "node pw/index.js",
-    "pw:login": "node pw/index.js login"
+    "start": "node src/index.js",
+    "login": "node src/index.js login",
+    "config": "node src/index.js config",
+    "pw": "node src/index.js",
+    "pw:login": "node src/index.js login"
   },
   "keywords": [],
   "author": "",

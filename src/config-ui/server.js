@@ -1,4 +1,4 @@
-// pw/ui.js — halaman pengaturan config (fomo-scanner.exe config / npm run config)
+// src/config-ui/server.js — halaman pengaturan config (fomo-scanner.exe config / npm run config)
 // Server lokal di 127.0.0.1:<uiPort> (config/general.json, bawaan 3939), hanya bisa dibuka dari laptop ini.
 // Yang bisa diatur: general (sebagian), sell-ad, buy. timing.json, paths.json, browser, output, uiPort
 // tidak ditampilkan dan tetap dipertahankan apa adanya saat simpan.
@@ -8,8 +8,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const { CONFIG_DIR } = require('./config');
-const PAGE = require('./ui-page');
+const { CONFIG_DIR } = require('../core/config');
+const PAGE = require('./page');
 
 const FILES = { general: 'general.json', sellAd: 'sell-ad.json', buy: 'buy.json' };
 

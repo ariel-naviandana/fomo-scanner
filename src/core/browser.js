@@ -1,4 +1,4 @@
-// pw/browser.js — buka Chrome asli dengan profil khusus bot (sesi login fomo tersimpan)
+// src/core/browser.js — buka Chrome asli dengan profil khusus bot (sesi login fomo tersimpan)
 const path = require('path');
 const { createRequire } = require('module');
 

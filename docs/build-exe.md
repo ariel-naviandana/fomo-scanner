@@ -1,6 +1,6 @@
 BUILD EXE (Windows PowerShell, jalankan di ROOT folder project, bukan di build/)
 ==========================================================
-fomo-scanner.exe dibuat dengan Node SEA: isinya node.exe + kode pw/ yang di-bundle esbuild.
+fomo-scanner.exe dibuat dengan Node SEA: isinya node.exe + kode src/ yang di-bundle esbuild.
 File perantara (bundle .js, .blob) ada di folder build/, exe hasilnya di root.
 Node yang dipakai untuk build harus versi yang sama dengan yang ingin dipakai exe-nya.
 
@@ -23,7 +23,7 @@ Setelah itu, build pertama kali dan build ulang pakai perintah yang sama di bawa
 BUILD fomo-scanner.exe
 ----------------------
 Remove-Item fomo-scanner.exe, build\bundle.js, build\sea.blob -ErrorAction SilentlyContinue
-esbuild pw/index.js --bundle --platform=node --external:playwright-core --outfile=build/bundle.js
+esbuild src/index.js --bundle --platform=node --external:playwright-core --outfile=build/bundle.js
 node --experimental-sea-config build/sea.json
 node -e "require('fs').copyFileSync(process.execPath, 'fomo-scanner.exe')"
 npx postject fomo-scanner.exe NODE_SEA_BLOB build/sea.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
@@ -37,7 +37,7 @@ Kebutuhan saat dijalankan (taruh di folder yang sama dengan exe):
 Pemakaian:
   fomo-scanner.exe          jalankan scanner (sell/AD/buy) sesuai config\general.json
   fomo-scanner.exe login    login ke fomo.family (sekali saja), lalu tutup jendela Chrome
-  fomo-scanner.exe config       buka halaman pengaturan config di browser (127.0.0.1)
+  fomo-scanner.exe config   buka halaman pengaturan config di browser (127.0.0.1)
   fomo-scanner-login.bat    sama dengan "fomo-scanner.exe login", tinggal double-click
   fomo-scanner-config.bat   buka halaman pengaturan, tinggal double-click
 

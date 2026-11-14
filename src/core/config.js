@@ -1,4 +1,4 @@
-// pw/config.js — baca pengaturan versi Playwright dari folder config/
+// src/core/config.js — baca pengaturan versi Playwright dari folder config/
 //   config/general.json  jadwal, browser, profil fomo, halaman awal, fitur yang dijalankan (run),
 //                        dry run (dryRun.sell/ad/buy), folder & file log (output)
 //   config/sell-ad.json  sell (TP / trailing) dan AD
@@ -9,9 +9,22 @@
 // Kalau folder config/ tidak ada, pw.config.json lama (satu file) masih dibaca.
 const fs = require('fs');
 const path = require('path');
+const util = require('./util');
 
 const isExe = !['node.exe', 'node'].includes(path.basename(process.execPath).toLowerCase());
-const BASE_DIR = isExe ? path.dirname(process.execPath) : path.join(__dirname, '..');
+// Folder project = folder pertama (naik dari file ini) yang berisi package.json.
+// Dicari, bukan path tetap, supaya tetap benar dari src/core/ maupun dari build/bundle.js.
+function projectDir() {
+    let dir = __dirname;
+    for (let i = 0; i < 5; i++) {
+        if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+        const up = path.dirname(dir);
+        if (up === dir) break;
+        dir = up;
+    }
+    return path.join(__dirname, '..', '..');
+}
+const BASE_DIR = isExe ? path.dirname(process.execPath) : projectDir();
 
 const DEFAULTS = {
     // Jadwal
@@ -184,7 +197,7 @@ function loadPwConfig() {
     // kompatibel dengan config lama (wait.profileLoadMs). profileUrl lama sengaja diabaikan:
     // selector baris sekarang untuk panel "Your positions" di halaman detail coin, bukan profil.
     if (user.wait && user.wait.startLoadMs == null && user.wait.profileLoadMs != null) cfg.wait.startLoadMs = user.wait.profileLoadMs;
-    require('./util').setTimezone(cfg.timezone);
+    util.setTimezone(cfg.timezone);
     // normalisasi daftar nama (huruf kecil) untuk pencocokan
     cfg.excludeSet = new Set((cfg.exclude || []).map((x) => String(x).trim().toLowerCase()).filter(Boolean));
     cfg.tpMap = Object.fromEntries(Object.entries(cfg.tpCustom || {})
@@ -195,8 +208,8 @@ function loadPwConfig() {
         .filter((c) => c && c.name)
         .map((c) => [String(c.name).trim().toLowerCase(), {
             name: String(c.name).trim(),
-            mcapMin: require('./util').money(c.mcapMin),   // "40.7K" -> 40700
-            mcapMax: require('./util').money(c.mcapMax),
+            mcapMin: util.money(c.mcapMin),   // "40.7K" -> 40700
+            mcapMax: util.money(c.mcapMax),
             amount: Number(c.amount),
         }]));
     return cfg;

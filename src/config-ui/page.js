@@ -1,4 +1,4 @@
-// pw/ui-page.js — HTML halaman pengaturan (satu file, tanpa library luar, dibundle ke exe)
+// src/config-ui/page.js — HTML halaman pengaturan (satu file, tanpa library luar, dibundle ke exe)
 // Catatan: isi di dalam String.raw tidak boleh memakai backtick atau ${ ... }.
 module.exports = String.raw`<!doctype html>
 <html lang="id">

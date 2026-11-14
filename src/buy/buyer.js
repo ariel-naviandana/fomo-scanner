@@ -1,4 +1,4 @@
-// pw/buyer.js — scanner buy: pantau watchlist (sidebar fomo) di tab kedua
+// src/buy/buyer.js — scanner buy: pantau watchlist (sidebar fomo) di tab kedua
 // Coin di watchlist yang terdaftar di config/buy.json dicek market cap-nya (dibaca dari sidebar).
 // Kalau market cap masuk range [mcapMin, mcapMax] -> buka detail coin, beli sebesar amount,
 // lalu unstar supaya coin hilang dari watchlist (tidak terbeli dua kali).
@@ -7,19 +7,17 @@
 // Log: fomo_buy_log.csv (waktu, nama, mcap sidebar, mcap detail, mcapMin, mcapMax, nominal, hasil)
 //   hasil: DRY_RUN_STOP / DRY_RUN_STOP_UNSTAR_GAGAL / BOUGHT / BOUGHT_UNSTAR_GAGAL / BUY_GAGAL / BUY_MISMATCH /
 //          BUY_MIN_ORDER / BUY_SALDO_KURANG / CLICK_GAGAL / DETAIL_MISMATCH / MCAP_TIDAK_COCOK
-const { log, sleep, nowTs, money, appendCsv, rand, jitter } = require('./util');
-const { FomoScanner } = require('./scanner');
+const { log, sleep, nowTs, money, appendCsv, rand, jitter } = require('../core/util');
+const { PageBot } = require('../core/page-helper');
+const { actionMatch, fillBuyAmount, minOrderText, insufficientText } = require('../core/order-form');
 
 // selector wajib di config/paths.json supaya scanner buy bisa jalan
 const REQUIRED = ['watchRow', 'watchRowName', 'watchRowMcap'];
 // selectors.watchScroll (opsional): elemen sidebar yang bisa di-scroll, supaya semua coin watchlist terbaca
 
-class BuyScanner {
+class BuyScanner extends PageBot {
     constructor(page, cfg) {
-        this.page = page;
-        this.cfg = cfg;
-        this.sel = cfg.selectors;
-        this.out = cfg.output;
+        super(page, cfg);
         this.b = cfg.buy;
         this.needOpen = true;
         this.sinceOpen = 0;
@@ -28,25 +26,7 @@ class BuyScanner {
         this.cooldown = {};      // coin yang dilewati sementara: { until, reason } (MC tidak cocok, saldo kurang, dll.)
         this.curDetail = -1;     // market cap di halaman detail (untuk log)
         this.total = 0;
-        this.stopped = false;
         this.warnedMissing = false;
-    }
-
-    async wait(ms) {
-        const end = Date.now() + ms;
-        while (!this.stopped && Date.now() < end) await sleep(Math.min(500, end - Date.now()));
-    }
-
-    x(q) {
-        return this.page.locator(`xpath=${q}`);
-    }
-
-    async text(locator, timeout) {
-        try {
-            return ((await locator.first().textContent({ timeout })) || '').replace(/\s+/g, ' ').trim();
-        } catch {
-            return null;
-        }
     }
 
     async open() {
@@ -258,22 +238,17 @@ class BuyScanner {
         // pastikan tab Buy aktif, isi nominal, baca tombol
         await this.x(this.sel.buyTab).first().click({ timeout: W.clickTimeoutMs }).catch(() => {});
         await sleep(500);
-        let buyText = null;
-        try {
-            await this.x(this.sel.buyInput).first().fill(String(c.amount), { timeout: W.elementTimeoutMs });
-            await sleep(1000);
-            buyText = await this.text(this.x(this.sel.buyButton), W.elementTimeoutMs);
-        } catch { /* dicek di bawah */ }
+        const { buyText } = await fillBuyAmount(this, c.amount);
 
         if (!buyText) {
-            const minText = await this.text(this.x(this.sel.minOrderButton), 1500);
+            const minText = await minOrderText(this);
             if (minText) {
                 log(`[BUY] ${c.name} dibatalkan: nominal $${c.amount} di bawah minimum (${minText})`, 'warn');
                 this.setCooldown(key, Number(this.b.retryCooldownMs) || 60000, 'di bawah minimum order');
                 this.logBuy(ts, c, mcap, 'BUY_MIN_ORDER');
                 return;
             }
-            const balText = await this.text(this.x(this.sel.insufficientButton), 1500);
+            const balText = await insufficientText(this);
             if (balText) {
                 log(`[BUY] ${c.name} dibatalkan: saldo tidak cukup untuk beli $${c.amount}`, 'warn');
                 this.setCooldown(key, Number(this.b.retryCooldownMs) || 60000, 'saldo kurang');
@@ -281,7 +256,7 @@ class BuyScanner {
                 return;
             }
         }
-        if (!FomoScanner.actionMatch(buyText, 'Buy', c.name)) {
+        if (!actionMatch(buyText, 'Buy', c.name)) {
             log(`[BUY] Tombol buy tidak cocok (${buyText}), ${c.name} dibatalkan`, 'err');
             this.setCooldown(key, Number(this.b.retryCooldownMs) || 60000, 'tombol Buy tidak cocok');
             this.logBuy(ts, c, mcap, 'BUY_MISMATCH');
