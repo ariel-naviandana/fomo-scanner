@@ -11,7 +11,7 @@ Panduan lengkap (config, alur, format log): `docs/guidance.md`.
 |---|---|---|
 | Jalankan bot | `npm start` | `fomo-scanner.exe` |
 | Login fomo (sekali) | `npm run login` | `fomo-scanner-login.bat` |
-| Halaman pengaturan config | `npm run ui` | `fomo-scanner-ui.bat` |
+| Halaman pengaturan config | `npm run config` | `fomo-scanner-config.bat` |
 
 Config yang disimpan dari halaman pengaturan langsung dipakai bot (run di-restart).
 
@@ -25,7 +25,7 @@ fomo-scanner/
 │  ├─ playwright.md     dokumentasi versi lama (pw.config.json, tanpa buy)
 │  └─ build-exe.md      cara build fomo-scanner.exe
 ├─ build/sea.json       config build exe (Node SEA)
-├─ fomo-scanner-login.bat, fomo-scanner-ui.bat
+├─ fomo-scanner-login.bat, fomo-scanner-config.bat
 ├─ fomo-scanner.exe     (hasil build, tidak di-commit)
 └─ package.json
 ```

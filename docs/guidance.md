@@ -12,14 +12,14 @@ Dokumentasi versi sebelumnya (satu file `pw.config.json`, tanpa buy) ada di `doc
 npm install          sekali (memasang playwright-core, tanpa download browser)
 npm run login        sekali: login ke fomo.family di jendela yang terbuka, lalu tutup jendelanya
 npm start            jalankan scanner sesuai jadwal (berhenti dengan Ctrl+C)
-npm run ui           halaman pengaturan config di browser
+npm run config           halaman pengaturan config di browser
 ```
-Atau pakai exe (cara build ada di `docs/build-exe.md`): `fomo-scanner.exe` untuk jalan, `fomo-scanner-login.bat` untuk login, `fomo-scanner-ui.bat` untuk pengaturan.
+Atau pakai exe (cara build ada di `docs/build-exe.md`): `fomo-scanner.exe` untuk jalan, `fomo-scanner-login.bat` untuk login, `fomo-scanner-config.bat` untuk pengaturan.
 Exe butuh folder `config\` dan `node_modules\playwright-core` di folder yang sama.
 
 
 ## Halaman pengaturan (UI)
-Double-click `fomo-scanner-ui.bat` (atau `npm run ui`): server lokal jalan di `http://127.0.0.1:3939` dan browser terbuka otomatis.
+Double-click `fomo-scanner-config.bat` (atau `npm run config`): server lokal jalan di `http://127.0.0.1:3939` dan browser terbuka otomatis.
 Hanya bisa dibuka dari laptop ini. Port diatur lewat `uiPort` di `config/general.json` (tidak tampil di UI).
 - Isi: tab **General** (fitur, dry run, jadwal restart, akun), **Sell & AD**, **Buy**. Setiap field ada penjelasannya.
   `timing.json`, `paths.json`, `browser`, `output`, `uiPort` tidak ditampilkan dan tetap dipertahankan saat simpan.

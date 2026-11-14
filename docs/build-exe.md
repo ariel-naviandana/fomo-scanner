@@ -32,14 +32,14 @@ Kebutuhan saat dijalankan (taruh di folder yang sama dengan exe):
   - folder config\ (general.json, sell-ad.json, buy.json, paths.json, timing.json)
   - node_modules\playwright-core   (tidak bisa dimasukkan ke exe, hasil "npm install")
   - Google Chrome terpasang (path di config\general.json -> browser.chromePath)
-  - fomo-scanner-login.bat dan fomo-scanner-ui.bat (opsional, untuk double-click)
+  - fomo-scanner-login.bat dan fomo-scanner-config.bat (opsional, untuk double-click)
 
 Pemakaian:
   fomo-scanner.exe          jalankan scanner (sell/AD/buy) sesuai config\general.json
   fomo-scanner.exe login    login ke fomo.family (sekali saja), lalu tutup jendela Chrome
-  fomo-scanner.exe ui       buka halaman pengaturan config di browser (127.0.0.1)
+  fomo-scanner.exe config       buka halaman pengaturan config di browser (127.0.0.1)
   fomo-scanner-login.bat    sama dengan "fomo-scanner.exe login", tinggal double-click
-  fomo-scanner-ui.bat       sama dengan "fomo-scanner.exe ui", tinggal double-click
+  fomo-scanner-config.bat   buka halaman pengaturan, tinggal double-click
 
 
 Catatan

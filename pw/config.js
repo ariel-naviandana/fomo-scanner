@@ -23,7 +23,7 @@ const DEFAULTS = {
     restartMinMin: 8,
     restartMaxMin: 15,
     runOnStart: true,         // langsung jalan saat start, tidak menunggu jadwal pertama
-    uiPort: 3939,             // port halaman pengaturan (fomo-scanner.exe ui), hanya 127.0.0.1
+    uiPort: 3939,             // port halaman pengaturan (fomo-scanner.exe config), hanya 127.0.0.1
     restartBrowser: true,     // tutup & buka ulang Chrome tiap jadwal (padanan killChrome)
     restartWaitMs: 3000,      // jeda setelah Chrome ditutup (padanan killWaitMs)
     browser: {

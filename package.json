@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node pw/index.js",
     "login": "node pw/index.js login",
-    "ui": "node pw/index.js ui",
+    "config": "node pw/index.js config",
     "pw": "node pw/index.js",
     "pw:login": "node pw/index.js login"
   },
@@ -18,11 +18,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ariel-naviandana/uivision-cron.git"
+    "url": "git+https://github.com/ariel-naviandana/fomo-scanner.git"
   },
   "bugs": {
-    "url": "https://github.com/ariel-naviandana/uivision-cron/issues"
+    "url": "https://github.com/ariel-naviandana/fomo-scanner/issues"
   },
-  "homepage": "https://github.com/ariel-naviandana/uivision-cron#readme",
+  "homepage": "https://github.com/ariel-naviandana/fomo-scanner#readme",
   "description": ""
 }
