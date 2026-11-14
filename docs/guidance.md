@@ -6,18 +6,28 @@ Versi Playwright fomo scanner. Dua tab dalam satu Chrome:
 
 Fitur yang dijalankan diatur di `config/general.json` -> `run`.
 Dokumentasi versi sebelumnya (satu file `pw.config.json`, tanpa buy) ada di `docs/playwright.md`.
-Kode lama tetap: `npm start` (`scheduler/index.js`) masih menjalankan scheduler UI.Vision seperti biasa.
 
 ## Menjalankan
 ```
 npm install          sekali (memasang playwright-core, tanpa download browser)
-npm run pw:login     sekali: login ke fomo.family di jendela yang terbuka, lalu tutup jendelanya
-npm run pw           jalankan scanner sesuai jadwal (berhenti dengan Ctrl+C)
+npm run login        sekali: login ke fomo.family di jendela yang terbuka, lalu tutup jendelanya
+npm start            jalankan scanner sesuai jadwal (berhenti dengan Ctrl+C)
+npm run ui           halaman pengaturan config di browser
 ```
-Atau pakai exe (cara build ada di `docs/build-exe.md`): `fomo-pw.exe` untuk jalan, `fomo-pw.exe login` untuk login.
+Atau pakai exe (cara build ada di `docs/build-exe.md`): `fomo-scanner.exe` untuk jalan, `fomo-scanner-login.bat` untuk login, `fomo-scanner-ui.bat` untuk pengaturan.
 Exe butuh folder `config\` dan `node_modules\playwright-core` di folder yang sama.
 
-Jangan jalankan `npm start` (UI.Vision) dan `npm run pw` bersamaan: dua-duanya bertransaksi di akun yang sama.
+
+## Halaman pengaturan (UI)
+Double-click `fomo-scanner-ui.bat` (atau `npm run ui`): server lokal jalan di `http://127.0.0.1:3939` dan browser terbuka otomatis.
+Hanya bisa dibuka dari laptop ini. Port diatur lewat `uiPort` di `config/general.json` (tidak tampil di UI).
+- Isi: tab **General** (fitur, dry run, jadwal restart, akun), **Sell & AD**, **Buy**. Setiap field ada penjelasannya.
+  `timing.json`, `paths.json`, `browser`, `output`, `uiPort` tidak ditampilkan dan tetap dipertahankan saat simpan.
+- **Simpan**: ada konfirmasi kalau dry run dimatikan, peringatan untuk nilai yang mencurigakan (min profit negatif saat
+  transaksi beneran, MC min > max, format MC tidak terbaca, nominal 0, nama coin dobel, dll).
+  Config lama di-backup ke `config/backup/<waktu>/` sebelum ditulis.
+- Bot yang sedang jalan memantau folder `config/`: begitu ada file yang berubah (dari UI atau edit manual), config dibaca
+  ulang dan run di-restart (proses yang sedang jalan diselesaikan dulu).
 
 ## Jadwal
 Sama seperti scheduler lama: tiap `schedule` (default tiap 15 menit) run dimulai ulang dengan state baru
@@ -33,6 +43,7 @@ Dibaca dari folder project (atau folder exe). Kalau folder `config/` tidak ada, 
 | `timezone` | Zona waktu jadwal & log | `"Asia/Jakarta"` |
 | `schedule` | Cron untuk memulai ulang run. `""` = jalan terus tanpa jadwal | `"*/15 * * * *"` |
 | `restartMode` | `"cron"` = run & Chrome di-restart sesuai `schedule`. `"random"` = restart setelah jeda acak antara `restartMinMin` dan `restartMaxMin` menit (diacak ulang tiap restart) | `"random"` |
+| `uiPort` | Port halaman pengaturan (hanya 127.0.0.1). Tidak tampil di UI | `3939` |
 | `restartMinMin` / `restartMaxMin` | Rentang jeda restart acak (menit), dipakai kalau `restartMode` = `"random"` | `8` / `15` |
 | `runOnStart` | Langsung jalan saat start, tidak menunggu jadwal pertama | `true` |
 | `restartBrowser` | Tutup & buka ulang Chrome tiap jadwal | `true` |

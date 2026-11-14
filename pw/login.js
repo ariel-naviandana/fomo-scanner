@@ -13,7 +13,7 @@ fs.mkdirSync(userDataDir, { recursive: true });
 console.log(`Profil Chrome: ${userDataDir}`);
 console.log('Login ke fomo.family di jendela Chrome yang terbuka.');
 console.log('Setelah selesai, TUTUP semua jendela Chrome tersebut, lalu jalankan bot.');
-console.log('Pastikan bot (npm run pw / fomo-pw.exe) sedang TIDAK jalan saat login.');
+console.log('Pastikan bot (npm start / fomo-scanner.exe) sedang TIDAK jalan saat login.');
 
 const child = spawn(chromePath, [
     `--user-data-dir=${userDataDir}`,

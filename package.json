@@ -1,12 +1,13 @@
 {
   "name": "fomo-scanner",
   "version": "1.0.0",
-  "main": "scheduler/index.js",
+  "main": "pw/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node scheduler/index.js",
+    "start": "node pw/index.js",
+    "login": "node pw/index.js login",
+    "ui": "node pw/index.js ui",
     "pw": "node pw/index.js",
-    "pw:login": "node pw/login.js"
+    "pw:login": "node pw/index.js login"
   },
   "keywords": [],
   "author": "",

@@ -5,14 +5,16 @@ node_modules/
 dist/
 # build/: file perantara build exe (bundle .js, .blob) tidak di-commit, config SEA tetap
 build/*
-!build/sea-config.json
-!build/sea-pw.json
+!build/sea.json
 out/
 
 # Environment and secrets
 .env
 .env.*
 !.env.example
+
+# Backup config dari UI
+config/backup/
 
 # Logs and runtime data
 logs/

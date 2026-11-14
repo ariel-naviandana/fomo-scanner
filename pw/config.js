@@ -14,7 +14,7 @@ const isExe = !['node.exe', 'node'].includes(path.basename(process.execPath).toL
 const BASE_DIR = isExe ? path.dirname(process.execPath) : path.join(__dirname, '..');
 
 const DEFAULTS = {
-    // Jadwal (padanan uivision.config.json versi UI.Vision)
+    // Jadwal
     timezone: 'Asia/Jakarta',
     schedule: '*/15 * * * *', // cron mulai ulang run; '' = jalan terus tanpa jadwal
     // restartMode: "cron" = restart run/Chrome sesuai schedule
@@ -23,6 +23,7 @@ const DEFAULTS = {
     restartMinMin: 8,
     restartMaxMin: 15,
     runOnStart: true,         // langsung jalan saat start, tidak menunggu jadwal pertama
+    uiPort: 3939,             // port halaman pengaturan (fomo-scanner.exe ui), hanya 127.0.0.1
     restartBrowser: true,     // tutup & buka ulang Chrome tiap jadwal (padanan killChrome)
     restartWaitMs: 3000,      // jeda setelah Chrome ditutup (padanan killWaitMs)
     browser: {
@@ -201,4 +202,4 @@ function loadPwConfig() {
     return cfg;
 }
 
-module.exports = { loadPwConfig, BASE_DIR };
+module.exports = { loadPwConfig, BASE_DIR, CONFIG_FILES, CONFIG_DIR: path.join(BASE_DIR, 'config') };

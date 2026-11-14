@@ -1,8 +1,12 @@
-// pw/index.js — titik masuk versi Playwright (juga dipakai untuk build fomo-pw.exe)
-//   node pw/index.js          / fomo-pw.exe          -> jalankan scanner sesuai jadwal
-//   node pw/index.js login    / fomo-pw.exe login    -> login ke fomo.family (sekali saja)
-if (process.argv.slice(2).includes('login')) {
+// pw/index.js — titik masuk fomo scanner (juga dipakai untuk build fomo-scanner.exe)
+//   node pw/index.js        / fomo-scanner.exe        -> jalankan scanner (sell/AD/buy) sesuai config
+//   node pw/index.js login  / fomo-scanner.exe login  -> login ke fomo.family (sekali saja)
+//   node pw/index.js ui     / fomo-scanner.exe ui     -> halaman pengaturan config di browser (127.0.0.1)
+const args = process.argv.slice(2);
+if (args.includes('login')) {
     require('./login');
+} else if (args.includes('ui')) {
+    require('./ui');
 } else {
     require('./run');
 }

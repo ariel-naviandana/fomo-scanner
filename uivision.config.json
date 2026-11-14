@@ -1,9 +1,0 @@
-{
-  "macroName": "fomo_scanner_v4",
-  "uivisionHtml": "file:///C:/coding/fomo-scanner/uivision.html",
-  "timezone": "Asia/Jakarta",
-  "schedule": "*/15 * * * *",
-  "killWaitMs": 3000,
-  "killChrome": true,
-  "runOnStart": true
-}

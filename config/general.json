@@ -33,5 +33,6 @@
     "sellLogFile": "fomo_sell_log.csv",
     "trailFile": "fomo_trail.csv",
     "buyLogFile": "fomo_buy_log.csv"
-  }
+  },
+  "uiPort": 3939
 }
