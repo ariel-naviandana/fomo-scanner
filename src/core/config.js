@@ -76,12 +76,19 @@ const DEFAULTS = {
     //   start     : trailing mulai dihitung saat margin >= start (%)
     //   drop      : sell kalau margin turun >= drop POIN dari puncak (puncak 50, drop 10 -> sell di <= 40)
     trail: { enabled: false, start: 30, drop: 10 },
+    // Cut loss: sell kalau margin <= pct (%). cutLossCustom = pct per coin (menggantikan pct global)
+    cutLoss: { enabled: false, pct: -50 },
+    cutLossCustom: {},
     adTrigger: -25,
     adMinAgeH: 6,
     adUseRsi: true,
     adRsiMax: 30,
     adMinOrderUsd: 0,     // minimum order manual (USD). 0 = otomatis dibaca dari tombol "Minimum amount $X"
     adBelowMin: 'skip',   // invested < minimum: 'skip' = AD dilewati, 'min' = beli sebesar minimum
+    // AD hanya untuk coin di adCoins: [{ name, mcapMin, mcapMax }]. Per coin dipakai baris PALING ATAS;
+    // setelah AD terbeli baris itu dihapus otomatis, baris berikutnya jadi patokan.
+    adCoins: [],
+    adRemoveOnDryRun: false, // dry run AD (klik Buy dilewati): true = baris tetap dihapus, false = dibiarkan
     maxLoop: 0,
     scanIntervalMs: 6000,
     reloadEvery: 4,
@@ -138,10 +145,13 @@ const DEFAULTS = {
 };
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+// key berisi map nama coin: diganti utuh, bukan digabung dengan nilai bawaan
+const MAP_KEYS = ['tpCustom', 'cutLossCustom'];
+
 function merge(base, over) {
     const out = { ...base };
     for (const [k, v] of Object.entries(over || {})) {
-        out[k] = isObj(v) && isObj(base[k]) && k !== 'tpCustom' ? merge(base[k], v) : v;
+        out[k] = isObj(v) && isObj(base[k]) && !MAP_KEYS.includes(k) ? merge(base[k], v) : v;
     }
     return out;
 }
@@ -203,6 +213,20 @@ function loadPwConfig() {
     cfg.tpMap = Object.fromEntries(Object.entries(cfg.tpCustom || {})
         .map(([k, v]) => [String(k).trim().toLowerCase(), Number(v)])
         .filter(([, v]) => Number.isFinite(v)));
+    cfg.cutMap = Object.fromEntries(Object.entries(cfg.cutLossCustom || {})
+        .map(([k, v]) => [String(k).trim().toLowerCase(), Number(v)])
+        .filter(([, v]) => Number.isFinite(v)));
+    // aturan AD per coin (urutan dipertahankan: baris atas = prioritas)
+    cfg.adRules = (Array.isArray(cfg.adCoins) ? cfg.adCoins : [])
+        .filter((c) => c && String(c.name || '').trim())
+        .map((c) => ({
+            name: String(c.name).trim(),
+            key: String(c.name).trim().toLowerCase(),
+            mcapMinText: String(c.mcapMin ?? ''),
+            mcapMaxText: String(c.mcapMax ?? ''),
+            min: util.money(c.mcapMin),
+            max: util.money(c.mcapMax),
+        }));
     // daftar coin buy: key nama huruf kecil
     cfg.buyMap = new Map((cfg.buy.coins || [])
         .filter((c) => c && c.name)

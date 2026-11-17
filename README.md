@@ -1,7 +1,7 @@
 # fomo-scanner
 
 Bot fomo.family berbasis Playwright, dua tab dalam satu Chrome:
-- **Sell & AD**: scan panel "Your positions", sell saat TP / trailing stop, average down (AD).
+- **Sell & AD**: scan panel "Your positions", sell saat TP / trailing stop / cut loss, average down (AD) untuk coin di daftar `adCoins` (rentang market cap bertingkat).
 - **Buy**: scan watchlist, beli coin yang market cap-nya masuk range, lalu unstar.
 
 Panduan lengkap (config, alur, format log): `docs/guidance.md`.
@@ -29,7 +29,6 @@ fomo-scanner/
 ├─ config/              general (jadwal, run, dryRun, output), sell-ad, buy, paths (selector), timing
 ├─ docs/
 │  ├─ guidance.md       panduan versi sekarang: config, scanner buy, format log
-│  ├─ playwright.md     dokumentasi versi lama (pw.config.json, tanpa buy)
 │  └─ build-exe.md      cara build fomo-scanner.exe (atau double-click build-exe.bat)
 ├─ build/sea.json       config build exe (Node SEA)
 ├─ fomo-scanner-login.bat, fomo-scanner-config.bat, build-exe.bat

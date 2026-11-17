@@ -2,11 +2,12 @@
 // Halaman awal = detail coin apa saja (startUrl), posisi dibaca dari panel "Your positions".
 // Klik baris posisi langsung membuka detail coin itu.
 // Alur per siklus: buka halaman awal (kalau perlu) -> scroll muat semua posisi -> scan tiap coin:
-//   - margin >= TP coin / trailing stop kena  -> SELL (sell.js)
-//   - margin <= adTrigger (belum ada aksi)     -> cek & AD (ad.js)
+//   - margin <= cut loss / margin >= TP coin / trailing stop kena -> SELL (sell.js)
+//   - margin <= adTrigger, coin ada di adCoins -> cek & AD (ad.js, ad-rules.js)
 // Trailing stop ada di trail.js. Log: fomo_positions.csv, fomo_sell_log.csv, fomo_ad_log.csv, fomo_trail.csv
 const { log, sleep, nowTs, money, margin, appendCsv } = require('../core/util');
 const { PageBot } = require('../core/page-helper');
+const { activeRule } = require('./ad-rules');
 
 class FomoScanner extends PageBot {
     constructor(page, cfg) {
@@ -14,7 +15,6 @@ class FomoScanner extends PageBot {
         this.needOpen = true;
         this.sinceOpen = 0;
         this.resumeK = 1;
-        this.adDone = new Set();   // coin yang sudah di-AD di run ini (maks 1x per coin)
         this.failMap = {};         // hitungan gagal-klik per coin
         this.pageFail = 0;
         this.total = 0;
@@ -24,6 +24,15 @@ class FomoScanner extends PageBot {
 
     rowLoc(k) {
         return this.x(`${this.sel.row}[${k}]`);
+    }
+
+    // Batas cut loss coin ini (%), null kalau cut loss mati
+    cutLossFor(name) {
+        if (!this.cfg.cutLoss || !this.cfg.cutLoss.enabled) return null;
+        const v = this.cfg.cutMap[name.toLowerCase()];
+        if (Number.isFinite(v)) return v;
+        const g = Number(this.cfg.cutLoss.pct);
+        return Number.isFinite(g) ? g : null;
     }
 
     tpFor(name) {
@@ -177,31 +186,39 @@ class FomoScanner extends PageBot {
             const nominal = money(colText);
             const pct = margin(colText);
             const tp = this.tpFor(name);
+            const cl = this.cutLossFor(name);
             const ts = nowTs();
-            log(`${name} | $${nominal} | ${pct}% | ${this.cfg.trail.enabled ? `trailing (min profit ${tp}%)` : `TP ${tp}%`}`, 'ok');
+            log(`${name} | $${nominal} | ${pct}% | ${this.cfg.trail.enabled ? `trailing (min profit ${tp}%)` : `TP ${tp}%`}`
+                + (cl !== null ? ` | cut loss ${cl}%` : ''), 'ok');
             appendCsv(this.out.dir, this.out.positionsFile, [ts, name, nominal, pct]);
 
-            // keputusan sell: trailing stop (kalau aktif, TP tidak dipakai) atau TP biasa
+            // keputusan sell: cut loss dulu, lalu trailing stop (kalau aktif, TP tidak dipakai) atau TP biasa
             let why = null;
             this.curKey = null;
-            if (this.cfg.sellEnabled === false) {
-                // sell dimatikan: TP / trailing tidak dicek
-            } else if (this.cfg.trail.enabled) {
+            // link coin = key trailing; dipakai juga untuk reset puncak setelah sell / AD
+            if (this.cfg.trail.enabled) {
                 this.curKey = String((await row.getAttribute('href', { timeout: 3000 }).catch(() => null)) || name).split('?')[0];
+            }
+            if (this.cfg.sellEnabled === false) {
+                // sell dimatikan: cut loss / TP / trailing tidak dicek
+            } else if (cl !== null && pct <= cl) {
+                why = `cut loss ${cl}%`;
+            } else if (this.cfg.trail.enabled) {
                 why = this.checkTrail(ts, this.curKey, name, pct);
             } else if (pct >= tp) {
                 why = `TP ${tp}%`;
             }
 
+            // satu aksi per siklus (sell atau AD); coin yang sama dicek lagi di siklus berikutnya
             if (why) {
                 acted = true;
                 await this.doSell(k, ts, name, nominal, pct, why);
             } else if (this.cfg.adEnabled !== false && pct <= this.cfg.adTrigger) {
-                if (this.adDone.has(name)) {
-                    log(`Kandidat AD ${name} (${pct}%) dilewati: sudah pernah di-AD pada run ini`, 'warn');
-                } else {
+                // AD hanya untuk coin di adCoins, patokan = baris paling atas coin itu
+                const rule = activeRule(this.cfg, name);
+                if (rule) {
                     acted = true;
-                    await this.doAd(k, ts, name, pct);
+                    await this.doAd(k, ts, name, pct, rule);
                 }
             }
         }

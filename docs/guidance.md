@@ -5,7 +5,6 @@ Versi Playwright fomo scanner. Dua tab dalam satu Chrome:
 - **Tab 2 - buy**: scan watchlist di sidebar, beli coin yang market cap-nya masuk range, lalu unstar.
 
 Fitur yang dijalankan diatur di `config/general.json` -> `run`.
-Dokumentasi versi sebelumnya (satu file `pw.config.json`, tanpa buy) ada di `docs/playwright.md`.
 
 ## Menjalankan
 ```
@@ -31,7 +30,7 @@ Hanya bisa dibuka dari laptop ini. Port diatur lewat `uiPort` di `config/general
 
 ## Jadwal
 Sama seperti scheduler lama: tiap `schedule` (default tiap 15 menit) run dimulai ulang dengan state baru
-(daftar coin yang sudah di-AD dan hitungan gagal-klik di-reset). Bedanya, run lama dihentikan dengan rapi:
+(hitungan gagal-klik di-reset). Bedanya, run lama dihentikan dengan rapi:
 transaksi yang sedang berjalan diselesaikan dulu, tidak dipotong di tengah seperti kill Chrome.
 
 ## Pengaturan: folder `config/`
@@ -72,7 +71,12 @@ Dibaca dari folder project (atau folder exe). Kalau folder `config/` tidak ada, 
 | `trail.start` | Trailing mulai dihitung saat margin >= nilai ini (%) | `30` |
 | `trail.drop` | Sell kalau margin turun >= sekian POIN dari puncak (puncak 50, drop 10 -> sell di <= 40) | `10` |
 | `showDust` | `true` = buka list dust supaya posisi kecil ikut di-scan, `false` = dust ditutup / tidak di-scan | `true` |
+| `cutLoss.enabled` | `true` = cut loss nyala: coin dijual kalau margin <= batas cut loss. Dicek sebelum TP / trailing dan sebelum AD | `false` |
+| `cutLoss.pct` | Batas cut loss (%) | `-50` |
+| `cutLossCustom` | Batas cut loss khusus per coin (menggantikan `cutLoss.pct`, hanya kalau cut loss nyala). Nama tidak peka huruf besar/kecil | `{ "FLOAT": -60 }` |
 | `exclude` | Coin yang dilewati total (tidak di-sell/AD). Nama tidak peka huruf besar/kecil. Kosong = `[]` | `["E/ACC", "GATO"]` |
+| `adCoins` | Coin yang boleh di-AD + rentang market cap, urutan = prioritas. Coin yang tidak ada di sini tidak di-AD. Lihat bagian AD di bawah | `[{ "name": "FLOAT", "mcapMin": "1.5M", "mcapMax": "2M" }, { "name": "FLOAT", "mcapMin": "1M", "mcapMax": "1.4M" }]` |
+| `adRemoveOnDryRun` | Dry run AD (klik Buy dilewati): `true` = baris `adCoins` tetap dihapus, `false` = dibiarkan (bisa dites berulang) | `false` |
 | `adTrigger` | Margin (%) yang memicu cek AD (margin <= nilai ini) | `-25` |
 | `adMinAgeH` | Umur coin minimal (jam) untuk AD | `6` |
 | `adUseRsi` | `true` = RSI jadi syarat AD | `true` |
@@ -117,8 +121,16 @@ Dibaca dari folder project (atau folder exe). Kalau folder `config/` tidak ada, 
 
 Sebelum scan, tombol "Show dust (N)" diklik kalau list dust masih tertutup (`selectors.dustButton`).
 
-Syarat AD sama dengan macro: umur >= `adMinAgeH`, RSI <= `adRsiMax` (kalau dipakai),
-market cap sekarang < avg entry, invested > 0. Nominal buy = invested (1:1). Maks 1x AD per coin per run.
+Urutan keputusan per coin: cut loss (kalau nyala) -> TP / trailing stop -> AD. Satu siklus maksimal satu aksi
+(sell atau AD); coin berikutnya dan coin yang sama dicek lagi di siklus berikutnya.
+
+AD hanya untuk coin di `adCoins`. Untuk satu coin yang dipakai baris **paling atas** milik coin itu. Syarat AD:
+margin <= `adTrigger`, umur >= `adMinAgeH`, RSI <= `adRsiMax` (kalau dipakai), market cap sekarang (halaman detail)
+di antara `mcapMin` dan `mcapMax` baris itu, invested > 0. Nominal buy = invested (1:1).
+Setelah AD terbeli (BOUGHT), baris itu otomatis dihapus dari `config/sell-ad.json` (run tidak di-restart) dan
+baris berikutnya untuk coin yang sama jadi patokan. Contoh: baris FLOAT 1.5M-2M dipakai dulu; setelah AD terbeli,
+patokan pindah ke FLOAT 1M-1.4M. Kalau halaman pengaturan sedang terbuka, muat ulang (refresh) dulu sebelum
+mengedit supaya baris yang sudah dihapus bot tidak tersimpan lagi.
 Kalau tombol Buy berubah jadi "Insufficient balance" (saldo tidak cukup), AD dibatalkan dan dicatat BUY_SALDO_KURANG.
 
 ## Scanner buy (tab 2)
@@ -133,6 +145,6 @@ Kalau tombol Buy berubah jadi "Insufficient balance" (saldo tidak cukup), AD dib
 ## Log (format sama dengan macro)
 - `fomo_positions.csv`: waktu, nama, nominal, margin
 - `fomo_sell_log.csv`: waktu, nama, nominal, margin, hasil (DRY_RUN_STOP / SOLD / SELL_GAGAL / MISMATCH / CLICK_GAGAL / SELL_MIN_ORDER)
-- `fomo_ad_log.csv`: waktu, nama, umur(jam), rsi, mc sekarang, mc avg entry, invested, hasil (LOLOS / TIDAK_LOLOS:... / DRY_RUN_STOP / BOUGHT / BUY_GAGAL / BUY_MISMATCH / BUY_MIN_ORDER / BUY_SALDO_KURANG / CLICK_GAGAL / POPUP_MISMATCH)
+- `fomo_ad_log.csv`: waktu, nama, umur(jam), rsi, mc sekarang, mc avg entry, invested, hasil (LOLOS / TIDAK_LOLOS:... / DRY_RUN_STOP / BOUGHT / BUY_GAGAL / BUY_MISMATCH / BUY_MIN_ORDER / BUY_SALDO_KURANG / CLICK_GAGAL / POPUP_MISMATCH), rentang MC baris `adCoins` yang dipakai
 - `fomo_buy_log.csv`: waktu, nama, mcap sidebar, mcap detail, mcapMin, mcapMax, nominal, hasil (MCAP_TIDAK_COCOK / DRY_RUN_STOP / DRY_RUN_STOP_UNSTAR_GAGAL / BOUGHT / BOUGHT_UNSTAR_GAGAL / BUY_GAGAL / BUY_MISMATCH / BUY_MIN_ORDER / BUY_SALDO_KURANG / CLICK_GAGAL / DETAIL_MISMATCH)
 - `fomo_trail.csv`: waktu, link coin, nama, puncak margin (`RESET` setelah SOLD atau AD BOUGHT). Dipakai trailing stop supaya puncak tetap tersimpan walau run/Chrome di-restart. Hapus file ini untuk reset semua puncak.

@@ -1,9 +1,12 @@
 // src/sell-ad/ad.js — alur AD / average down (method FomoScanner)
-// Cek di halaman detail: umur coin, RSI (opsional), MC sekarang < avg entry MC, invested.
-// Kalau lolos: isi nominal = invested (atau minimum order), lalu Buy.
-// Log: fomo_ad_log.csv (waktu, nama, umur, RSI, MC, avg MC, invested, hasil)
+// Hanya coin di adCoins. Cek di halaman detail: umur coin, RSI (opsional), MC sekarang di dalam rentang
+// baris adCoins yang aktif (mcapMin - mcapMax), invested.
+// Kalau lolos: isi nominal = invested (1:1, atau minimum order), lalu Buy. Setelah BOUGHT baris adCoins
+// dihapus otomatis (dry run: hanya kalau adRemoveOnDryRun).
+// Log: fomo_ad_log.csv (waktu, nama, umur, RSI, MC, avg MC, invested, hasil, rentang MC)
 const { log, sleep, nowTs, money, ageHours, appendCsv } = require('../core/util');
 const { actionMatch, fillBuyAmount, minOrderText, insufficientText } = require('../core/order-form');
+const { removeRule, rangeText } = require('./ad-rules');
 
 module.exports = {
     // ---------- AD (average down) ----------
@@ -35,10 +38,10 @@ module.exports = {
         return -1;
     },
 
-    async doAd(k, ts, name, pct) {
+    async doAd(k, ts, name, pct, rule) {
         const W = this.cfg.wait;
         const d = { ageH: -1, mcNow: -1, avgMC: -1, invested: -1, rsi: -1, result: 'POPUP_MISMATCH' };
-        log(`KANDIDAT AD: ${name} (${pct}%) -> cek detail coin`, 'warn');
+        log(`KANDIDAT AD: ${name} (${pct}%) | rentang MC ${rangeText(rule)} -> cek detail coin`, 'warn');
 
         const href = await this.rowHref(k);
         if (!(await this.clickRowIcon(k, name))) {
@@ -63,22 +66,26 @@ module.exports = {
                 const fail = [];
                 if (!(d.ageH >= this.cfg.adMinAgeH)) fail.push('UMUR');
                 if (this.cfg.adUseRsi && !(d.rsi >= 0 && d.rsi <= this.cfg.adRsiMax)) fail.push('RSI');
-                if (!(d.mcNow > 0 && d.avgMC > 0 && d.mcNow < d.avgMC)) fail.push('MC');
+                if (!(d.mcNow > 0 && d.mcNow >= rule.min && d.mcNow <= rule.max)) fail.push('MC');
                 if (!(d.invested > 0)) fail.push('INVESTED');
                 d.result = fail.length ? `TIDAK_LOLOS:${fail.join('+')}` : 'LOLOS';
 
                 log(`AD CEK ${name}: umur=${d.ageH}h (min ${this.cfg.adMinAgeH}) | RSI=${d.rsi} (maks ${this.cfg.adRsiMax}) | `
-                    + `MC=${d.mcNow} vs avg=${d.avgMC} | invested=${d.invested} | hasil=${d.result}`, 'warn');
+                    + `MC=${d.mcNow} (rentang ${rule.min} - ${rule.max}, avg entry ${d.avgMC}) | invested=${d.invested} | hasil=${d.result}`, 'warn');
 
                 if (d.result === 'LOLOS') {
                     await this.buyAd(name, d);
+                    // baris adCoins selesai dipakai -> hapus, baris berikutnya jadi patokan
+                    if (d.result === 'BOUGHT' || (d.result === 'DRY_RUN_STOP' && this.cfg.adRemoveOnDryRun)) {
+                        removeRule(this.cfg, rule);
+                    }
                 } else {
                     log(`AD ${name} belum memenuhi syarat, dicek lagi di putaran berikutnya`, 'warn');
                 }
             }
         }
 
-        appendCsv(this.out.dir, this.out.adLogFile, [ts, name, d.ageH, d.rsi, d.mcNow, d.avgMC, d.invested, d.result]);
+        appendCsv(this.out.dir, this.out.adLogFile, [ts, name, d.ageH, d.rsi, d.mcNow, d.avgMC, d.invested, d.result, rangeText(rule)]);
 
         // kembali ke halaman awal, lanjut dari coin berikutnya
         await this.openProfile().catch(() => { this.needOpen = true; });
@@ -149,7 +156,6 @@ module.exports = {
             d.result = 'BOUGHT';
             // avg entry berubah setelah AD, puncak trailing lama tidak berlaku lagi
             if (this.cfg.trail.enabled && this.curKey && this.trailMap[this.curKey] !== undefined) this.setTrail(nowTs(), this.curKey, name, null);
-            this.adDone.add(name);
         } catch {
             await sleep(W.afterActionMs);
             log(`BUY GAGAL: ${name} (tombol Buy tidak bisa diklik)`, 'err');

@@ -80,6 +80,8 @@ td.preview { color: var(--muted); font-size: 12px; white-space: nowrap; padding-
   header { padding: 10px 16px; }
   main { padding: 16px; }
 }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 </style>
 </head>
 <body>
@@ -138,15 +140,20 @@ td.preview { color: var(--muted); font-size: 12px; white-space: nowrap; padding-
         { k: 'trail.enabled', t: 'bool', label: 'Trailing stop', help: 'Nyala = sell pakai trailing stop: tunggu margin mencapai puncak, sell kalau turun sekian poin dari puncak (dan masih >= min profit).' },
         { k: 'trail.start', t: 'number', label: 'Trailing mulai (%)', help: 'Puncak mulai dicatat saat margin >= nilai ini.' },
         { k: 'trail.drop', t: 'number', label: 'Turun dari puncak (poin)', help: 'Sell kalau margin turun >= sekian poin dari puncak. Contoh puncak 50, drop 10 = sell di <= 40.' },
+        { k: 'cutLoss.enabled', t: 'bool', label: 'Cut loss', help: 'Nyala = coin dijual kalau margin turun sampai batas cut loss. Dicek sebelum TP / trailing, dan sebelum AD.' },
+        { k: 'cutLoss.pct', t: 'number', label: 'Batas cut loss (%)', help: 'Sell kalau margin <= nilai ini. Contoh -40. Coin di cut loss custom memakai nilainya sendiri.' },
+        { k: 'cutLossCustom', t: 'map', label: 'Cut loss custom per coin', keyLabel: 'Nama coin', valLabel: 'Cut loss (%)', help: 'Menggantikan batas cut loss untuk coin tertentu (hanya berlaku kalau cut loss nyala). Nama tidak peka huruf besar/kecil. Contoh FLOAT = -60.' },
         { k: 'showDust', t: 'bool', label: 'Scan posisi dust', help: 'Nyala = list "Show dust" dibuka supaya posisi kecil ikut di-scan.' },
         { k: 'exclude', t: 'list', label: 'Exclude', itemLabel: 'Nama coin', help: 'Coin yang dilewati total (tidak di-sell, tidak di-AD). Nama tidak peka huruf besar/kecil.' }
       ]},
       { title: 'Average down (AD)', fields: [
+        { k: 'adCoins', t: 'adcoins', wide: true, label: 'Coin AD (rentang market cap)', help: 'Hanya coin di daftar ini yang di-AD. Satu coin boleh punya beberapa baris; yang dipakai baris PALING ATAS milik coin itu. AD jalan kalau MC sekarang di antara MC min dan MC max baris itu (plus syarat pemicu, umur, RSI). Setelah AD terbeli, baris itu otomatis dihapus dan baris berikutnya jadi patokan. Nominal AD = invested (1:1). MC ditulis seperti di fomo: 1.5M, 400K.' },
         { k: 'adTrigger', t: 'number', label: 'Pemicu AD (%)', help: 'Coin dicek AD kalau margin <= nilai ini. Contoh -25.' },
         { k: 'adMinAgeH', t: 'number', label: 'Umur coin minimal (jam)', help: 'AD hanya kalau umur coin >= nilai ini.' },
         { k: 'adUseRsi', t: 'bool', label: 'Pakai syarat RSI', help: 'Nyala = RSI di chart jadi syarat AD.' },
         { k: 'adRsiMax', t: 'number', label: 'RSI maksimal', help: 'AD hanya kalau RSI <= nilai ini. Contoh 30.' },
         { k: 'adMinOrderUsd', t: 'number', label: 'Minimum order (USD)', help: '0 = otomatis dibaca dari tombol "Minimum amount $X" di fomo. Isi angka untuk memakai nilai sendiri.' },
+        { k: 'adRemoveOnDryRun', t: 'bool', label: 'Hapus baris saat dry run', help: 'Saat dry run AD (klik Buy dilewati): nyala = baris adCoins tetap dihapus seperti beli beneran, mati = baris dibiarkan (bisa dites berulang).' },
         { k: 'adBelowMin', t: 'select', options: [['skip', 'skip (lewati AD)'], ['min', 'min (beli sebesar minimum)']], label: 'Kalau di bawah minimum', help: 'Invested < minimum order: skip = AD dibatalkan (BUY_MIN_ORDER), min = nominal dinaikkan ke minimum lalu tetap beli.' }
       ]}
     ],
@@ -245,6 +252,7 @@ td.preview { color: var(--muted); font-size: 12px; white-space: nowrap; padding-
     if (f.t === 'list') return listEditor(obj, f);
     if (f.t === 'map') return mapEditor(obj, f);
     if (f.t === 'coins') return coinsEditor(obj, f);
+    if (f.t === 'adcoins') return coinsEditor(obj, f, true);
     return el('span', { text: '?' });
   }
 
@@ -299,7 +307,7 @@ td.preview { color: var(--muted); font-size: 12px; white-space: nowrap; padding-
     return wrap;
   }
 
-  function coinsEditor(obj, f) {
+  function coinsEditor(obj, f, noAmount) {
     var wrap = el('div');
     function draw() {
       wrap.innerHTML = '';
@@ -318,12 +326,20 @@ td.preview { color: var(--muted); font-size: 12px; white-space: nowrap; padding-
         mx.addEventListener('input', function () { c.mcapMax = mx.value; upd(); markDirty(); });
         am.addEventListener('input', function () { c.amount = am.value === '' ? 0 : Number(am.value); markDirty(); });
         upd();
-        tb.appendChild(el('tr', null, [el('td', null, [name]), el('td', null, [mn]), el('td', null, [mx]), el('td', null, [am]), pv,
-          el('td', null, [el('button', { 'class': 'rowbtn', type: 'button', text: 'Hapus', onclick: function () { arr.splice(i, 1); draw(); markDirty(); } })])]));
+        var btns = [el('button', { 'class': 'rowbtn', type: 'button', text: 'Hapus', onclick: function () { arr.splice(i, 1); draw(); markDirty(); } })];
+        if (noAmount) {
+          // urutan = prioritas: baris bisa dipindah naik / turun
+          btns.unshift(el('button', { 'class': 'rowbtn', type: 'button', text: '\u2193', title: 'Turunkan', onclick: function () { if (i < arr.length - 1) { var t = arr[i]; arr[i] = arr[i + 1]; arr[i + 1] = t; draw(); markDirty(); } } }));
+          btns.unshift(el('button', { 'class': 'rowbtn', type: 'button', text: '\u2191', title: 'Naikkan', onclick: function () { if (i > 0) { var t = arr[i]; arr[i] = arr[i - 1]; arr[i - 1] = t; draw(); markDirty(); } } }));
+        }
+        var cells = [el('td', null, [name]), el('td', null, [mn]), el('td', null, [mx])];
+        if (!noAmount) cells.push(el('td', null, [am]));
+        tb.appendChild(el('tr', null, cells.concat([pv, el('td', { style: 'white-space:nowrap' }, btns)])));
       });
-      var head = el('thead', null, [el('tr', null, ['Nama coin', 'MC min', 'MC max', 'Nominal ($)', 'Range terbaca', ''].map(function (h) { return el('th', { text: h }); }))]);
+      var cols = noAmount ? ['Nama coin', 'MC min', 'MC max', 'Range terbaca', ''] : ['Nama coin', 'MC min', 'MC max', 'Nominal ($)', 'Range terbaca', ''];
+      var head = el('thead', null, [el('tr', null, cols.map(function (h) { return el('th', { text: h }); }))]);
       wrap.appendChild(el('table', null, [head, tb]));
-      wrap.appendChild(el('button', { 'class': 'rowbtn add', type: 'button', text: '+ Tambah coin', onclick: function () { arr.push({ name: '', mcapMin: '', mcapMax: '', amount: 0 }); draw(); markDirty(); } }));
+      wrap.appendChild(el('button', { 'class': 'rowbtn add', type: 'button', text: noAmount ? '+ Tambah baris' : '+ Tambah coin', onclick: function () { arr.push(noAmount ? { name: '', mcapMin: '', mcapMax: '' } : { name: '', mcapMin: '', mcapMax: '', amount: 0 }); draw(); markDirty(); } }));
     }
     draw();
     return wrap;
@@ -374,6 +390,24 @@ td.preview { color: var(--muted); font-size: 12px; white-space: nowrap; padding-
     if (num(get(s, 'trail.drop')) <= 0 && get(s, 'trail.enabled')) errs.push('Turun dari puncak (trail.drop) harus > 0.');
     if (adLive && num(s.adTrigger) > 0) warns.push('Pemicu AD ' + s.adTrigger + '% (positif) saat AD BENERAN: coin yang sedang profit bisa di-AD.');
     if (num(s.adRsiMax) <= 0 && s.adUseRsi) warns.push('RSI maksimal <= 0: AD tidak akan pernah lolos.');
+    if (get(s, 'cutLoss.enabled')) {
+      var clg = num(get(s, 'cutLoss.pct'));
+      var clCheck = function (label, v) {
+        if (v >= 0) warns.push(label + ' ' + v + '% (tidak negatif): coin yang sedang profit bisa ikut terjual cut loss.');
+        if (get(g, 'run.ad') !== false && v > num(s.adTrigger)) warns.push(label + ' ' + v + '% lebih tinggi dari pemicu AD ' + s.adTrigger + '%: coin terjual cut loss sebelum sempat di-AD.');
+      };
+      clCheck('Cut loss', clg);
+      Object.keys(s.cutLossCustom || {}).forEach(function (k) { clCheck('Cut loss custom ' + k, num(s.cutLossCustom[k])); });
+    }
+    if (get(g, 'run.ad') !== false && !(s.adCoins || []).length) warns.push('AD nyala tapi daftar coin AD (adCoins) kosong: tidak ada coin yang di-AD.');
+    (s.adCoins || []).forEach(function (c, i) {
+      var label = 'Coin AD #' + (i + 1) + (c.name ? ' (' + c.name + ')' : '');
+      if (!String(c.name || '').trim()) errs.push(label + ': nama kosong.');
+      var mn = money(c.mcapMin), mx = money(c.mcapMax);
+      if (!isFinite(mn) || !isFinite(mx)) errs.push(label + ': MC min/max tidak terbaca (pakai format 400K / 1.5M / angka).');
+      else if (mn > mx) errs.push(label + ': MC min lebih besar dari MC max.');
+      else if (mx < 1000) warns.push(label + ': MC max ' + fmt(mx) + ' sangat kecil. Lupa menulis K/M?');
+    });
 
     var seen = {};
     (b.coins || []).forEach(function (c, i) {
@@ -443,6 +477,8 @@ td.preview { color: var(--muted); font-size: 12px; white-space: nowrap; padding-
   }
 
   // ---------- init ----------
+  // cegah input angka berubah karena scroll mouse: blur dulu, biar scroll jalan ke halaman
+  document.addEventListener('wheel', function (e) { var a = document.activeElement; if (a && a.type === 'number' && e.target === a) a.blur(); }, { passive: true });
   document.getElementById('tabs').addEventListener('click', function (e) {
     var t = e.target.getAttribute('data-tab'); if (!t) return;
     Array.prototype.forEach.call(document.querySelectorAll('nav button'), function (b) { b.classList.toggle('active', b === e.target); });

@@ -17,8 +17,8 @@ const FILES = { general: 'general.json', sellAd: 'sell-ad.json', buy: 'buy.json'
 const EDITABLE = {
     general: ['schedule', 'restartMode', 'restartMinMin', 'restartMaxMin', 'runOnStart', 'restartBrowser',
         'run', 'dryRun', 'profileName', 'startTokenUrl'],
-    sellAd: ['minProfit', 'tpCustom', 'trail', 'showDust', 'exclude', 'adTrigger', 'adMinAgeH', 'adUseRsi',
-        'adRsiMax', 'adMinOrderUsd', 'adBelowMin'],
+    sellAd: ['minProfit', 'tpCustom', 'trail', 'cutLoss', 'cutLossCustom', 'showDust', 'exclude', 'adCoins', 'adTrigger',
+        'adMinAgeH', 'adUseRsi', 'adRsiMax', 'adMinOrderUsd', 'adBelowMin', 'adRemoveOnDryRun'],
     buy: ['unstarAfterBuy', 'unstarOnDryRun', 'standbyRandom', 'coins'],
 };
 
@@ -36,8 +36,20 @@ function stamp() {
     return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
 }
 
+// Nilai awal untuk key baru yang belum ada di file (supaya form menampilkan nilai yang sama dengan yang dipakai bot)
+const FILL = {
+    sellAd: { cutLoss: { enabled: false, pct: -50 }, cutLossCustom: {}, adCoins: [], adRemoveOnDryRun: false },
+};
+
 function loadAll() {
-    return Object.fromEntries(Object.entries(FILES).map(([k, f]) => [k, readJson(f)]));
+    return Object.fromEntries(Object.entries(FILES).map(([k, f]) => {
+        const v = readJson(f);
+        for (const [key, def] of Object.entries(FILL[k] || {})) {
+            if (v[key] === undefined) v[key] = JSON.parse(JSON.stringify(def));
+            else if (key === 'cutLoss' && typeof v[key] === 'object') v[key] = { ...def, ...v[key] };
+        }
+        return [k, v];
+    }));
 }
 
 function saveAll(body) {

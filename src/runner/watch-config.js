@@ -1,7 +1,7 @@
 // src/runner/watch-config.js — pantau folder config/
 // Polling waktu ubah file (lebih andal di Windows daripada fs.watch). Kalau berubah: tunggu sebentar
 // (file bisa ditulis beberapa kali saat simpan), lalu panggil onChange(). Selama onChange berjalan,
-// perubahan berikutnya ditunda sampai selesai.
+// perubahan berikutnya ditunda sampai selesai. Tulisan bot sendiri (acceptConfigChange) diabaikan.
 const fs = require('fs');
 const path = require('path');
 const { CONFIG_DIR, CONFIG_FILES } = require('../core/config');
@@ -18,9 +18,16 @@ function configSignature() {
     }).join('|');
 }
 
+let last = null;
+
+// Dipanggil setelah bot sendiri menulis config (mis. hapus baris adCoins): perubahan ini tidak memicu restart
+function acceptConfigChange() {
+    last = configSignature();
+}
+
 function watchConfig(onChange) {
     if (!fs.existsSync(CONFIG_DIR)) return;
-    let last = configSignature();
+    last = configSignature();
     let applying = false;
     setInterval(async () => {
         if (applying) return;
@@ -36,4 +43,4 @@ function watchConfig(onChange) {
     }, 2000);
 }
 
-module.exports = { watchConfig };
+module.exports = { watchConfig, acceptConfigChange };

@@ -132,7 +132,9 @@ function printSummary() {
     console.log(`   Chrome      : ${cfg.browser.userDataDir} (headless: ${cfg.browser.headless ? 'ya' : 'tidak'})`);
     const t = cfg.trail;
     console.log(`   Sell        : ${t.enabled ? `trailing mulai ${t.start}% | turun ${t.drop} poin | min profit ${cfg.minProfit}%` : `TP ${cfg.minProfit}% (minProfit)${Object.keys(cfg.tpMap).length ? ` | custom ${JSON.stringify(cfg.tpCustom)}` : ''}`} | ${cfg.sellEnabled === false ? 'NONAKTIF' : cfg.dryRunSell ? 'DRY RUN' : 'JUAL BENERAN'}`);
-    console.log(`   AD          : margin <= ${cfg.adTrigger}% | umur >= ${cfg.adMinAgeH}h | RSI ${cfg.adUseRsi ? `<= ${cfg.adRsiMax}` : 'tidak dipakai'} | ${cfg.adEnabled === false ? 'NONAKTIF' : cfg.dryRunAd ? 'DRY RUN' : 'BELI BENERAN'}`);
+    const cl = cfg.cutLoss || {};
+    console.log(`   Cut loss    : ${cl.enabled ? `margin <= ${cl.pct}%${Object.keys(cfg.cutMap).length ? ` | custom ${JSON.stringify(cfg.cutLossCustom)}` : ''}` : 'mati'}`);
+    console.log(`   AD          : margin <= ${cfg.adTrigger}% | umur >= ${cfg.adMinAgeH}h | RSI ${cfg.adUseRsi ? `<= ${cfg.adRsiMax}` : 'tidak dipakai'} | ${cfg.adRules.length} baris adCoins | ${cfg.adEnabled === false ? 'NONAKTIF' : cfg.dryRunAd ? 'DRY RUN' : 'BELI BENERAN'}`);
     console.log(`   Buy         : ${cfg.buyEnabled ? `${cfg.buyMap.size} coin dipantau | ${cfg.buy.dryRunBuy ? 'DRY RUN' : 'BELI BENERAN'}` : 'NONAKTIF'}`);
     console.log(`   Exclude     : ${cfg.exclude.length ? cfg.exclude.join(', ') : '-'}`);
     console.log(`   Output      : ${cfg.output.dir}`);
