@@ -22,6 +22,11 @@ Setelah itu, build pertama kali dan build ulang pakai perintah yang sama di bawa
 
 BUILD fomo-scanner.exe
 ----------------------
+Cara cepat: double-click build-exe.bat di root project (menjalankan semua perintah di bawah,
+termasuk npm install kalau node_modules belum ada, dan berhenti kalau ada langkah yang gagal).
+Pastikan fomo-scanner.exe sedang tidak jalan.
+
+Manual (PowerShell):
 Remove-Item fomo-scanner.exe, build\bundle.js, build\sea.blob -ErrorAction SilentlyContinue
 esbuild src/index.js --bundle --platform=node --external:playwright-core --outfile=build/bundle.js
 node --experimental-sea-config build/sea.json

@@ -30,9 +30,9 @@ fomo-scanner/
 ├─ docs/
 │  ├─ guidance.md       panduan versi sekarang: config, scanner buy, format log
 │  ├─ playwright.md     dokumentasi versi lama (pw.config.json, tanpa buy)
-│  └─ build-exe.md      cara build fomo-scanner.exe
+│  └─ build-exe.md      cara build fomo-scanner.exe (atau double-click build-exe.bat)
 ├─ build/sea.json       config build exe (Node SEA)
-├─ fomo-scanner-login.bat, fomo-scanner-config.bat
+├─ fomo-scanner-login.bat, fomo-scanner-config.bat, build-exe.bat
 ├─ fomo-scanner.exe     (hasil build, tidak di-commit)
 └─ package.json
 ```
