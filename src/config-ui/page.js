@@ -152,9 +152,7 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
         { k: 'adMinAgeH', t: 'number', label: 'Umur coin minimal (jam)', help: 'AD hanya kalau umur coin >= nilai ini.' },
         { k: 'adUseRsi', t: 'bool', label: 'Pakai syarat RSI', help: 'Nyala = RSI di chart jadi syarat AD.' },
         { k: 'adRsiMax', t: 'number', label: 'RSI maksimal', help: 'AD hanya kalau RSI <= nilai ini. Contoh 30.' },
-        { k: 'adMinOrderUsd', t: 'number', label: 'Minimum order (USD)', help: '0 = otomatis dibaca dari tombol "Minimum amount $X" di fomo. Isi angka untuk memakai nilai sendiri.' },
-        { k: 'adRemoveOnDryRun', t: 'bool', label: 'Hapus baris saat dry run', help: 'Saat dry run AD (klik Buy dilewati): nyala = baris adCoins tetap dihapus seperti beli beneran, mati = baris dibiarkan (bisa dites berulang).' },
-        { k: 'adBelowMin', t: 'select', options: [['skip', 'skip (lewati AD)'], ['min', 'min (beli sebesar minimum)']], label: 'Kalau di bawah minimum', help: 'Invested < minimum order: skip = AD dibatalkan (BUY_MIN_ORDER), min = nominal dinaikkan ke minimum lalu tetap beli.' }
+        { k: 'adRemoveOnDryRun', t: 'bool', label: 'Hapus baris saat dry run', help: 'Saat dry run AD (klik Buy dilewati): nyala = baris adCoins tetap dihapus seperti beli beneran, mati = baris dibiarkan (bisa dites berulang).' }
       ]}
     ],
     buy: [
