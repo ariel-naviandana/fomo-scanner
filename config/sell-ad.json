@@ -1,8 +1,8 @@
 {
-  "minProfit": 15,
+  "minProfit": 20,
   "tpCustom": {
-    "CONTOHCOIN": 10,
-    "CONTOHCOIN2": 20
+    "CONTOHCOIN": 17.5,
+    "CONTOHCOIN2": 30
   },
   "trail": {
     "enabled": true,
@@ -11,12 +11,39 @@
   },
   "showDust": true,
   "exclude": [
-    "CONTOHCOIN", "CONTOHCOIN2"
+    "CONTOHCOIN",
+    "CONTOHCOIN2"
   ],
   "adTrigger": -25,
   "adMinAgeH": 6,
   "adUseRsi": true,
   "adRsiMax": 30,
   "adMinOrderUsd": 0,
-  "adBelowMin": "skip"
+  "adBelowMin": "skip",
+  "cutLoss": {
+    "enabled": false,
+    "pct": -50
+  },
+  "cutLossCustom": {
+    "CONTOH1": -40,
+    "CONTOH2": -60
+  },
+  "adCoins": [
+    {
+      "name": "CONTOH1",
+      "mcapMin": "1.5M",
+      "mcapMax": "2M"
+    },
+    {
+      "name": "CONTOH1",
+      "mcapMin": "1M",
+      "mcapMax": "1.4M"
+    },
+    {
+      "name": "CONTOH2",
+      "mcapMin": "500K",
+      "mcapMax": "800K"
+    }
+  ],
+  "adRemoveOnDryRun": false
 }
