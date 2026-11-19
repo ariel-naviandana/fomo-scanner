@@ -1,7 +1,8 @@
 // src/buy/buyer.js — scanner buy: pantau watchlist (sidebar fomo) di tab kedua
 // Coin di watchlist yang terdaftar di config/buy.json dicek market cap-nya (dibaca dari sidebar).
 // Kalau market cap masuk range [mcapMin, mcapMax] -> buka detail coin, beli sebesar amount,
-// lalu unstar supaya coin hilang dari watchlist (tidak terbeli dua kali).
+// lalu unstar supaya coin hilang dari watchlist (tidak terbeli dua kali), dan coin dihapus dari buy.json -> coins.
+// Saat dry run, unstar dan hapus dari buy.json hanya kalau unstarOnDryRun nyala.
 // Sebelum Buy, market cap dicek ulang di halaman detail (kotak Market cap): sidebar kadang glitch.
 // Saat standby, tab pindah ke detail coin watchlist yang dipilih acak (lebih natural).
 // Log: fomo_buy_log.csv (waktu, nama, mcap sidebar, mcap detail, mcapMin, mcapMax, nominal, hasil)
@@ -10,6 +11,7 @@
 const { log, sleep, nowTs, money, appendCsv, rand, jitter } = require('../core/util');
 const { PageBot } = require('../core/page-helper');
 const { actionMatch, fillBuyAmount, minOrderText, insufficientText } = require('../core/order-form');
+const { removeBuyCoin } = require('./buy-config');
 
 // selector wajib di config/paths.json supaya scanner buy bisa jalan
 const REQUIRED = ['watchRow', 'watchRowName', 'watchRowMcap'];
@@ -303,6 +305,9 @@ class BuyScanner extends PageBot {
             }
         }
         this.logBuy(ts, c, mcap, result);
+
+        // hapus coin dari buy.json supaya tidak terbeli lagi walau bot restart; dry run ikut aturan unstarOnDryRun
+        if (!this.b.dryRunBuy || this.b.unstarOnDryRun !== false) removeBuyCoin(this.cfg, key, c);
     }
 
     async run() {

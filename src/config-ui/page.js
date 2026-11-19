@@ -160,8 +160,8 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
         { k: 'coins', t: 'coins', wide: true, label: 'Daftar coin', help: 'Coin di watchlist fomo yang dibeli kalau market cap di antara MC min dan MC max. Nama sesuai watchlist (tidak peka huruf besar/kecil). MC boleh ditulis seperti di fomo: 40.7K, 2.32M, 1.5B. Jangan tulis 40 saja (dibaca $40). Coin di watchlist yang tidak ada di sini diabaikan.' }
       ]},
       { title: 'Perilaku buy', fields: [
-        { k: 'unstarAfterBuy', t: 'bool', label: 'Unstar setelah beli', help: 'Nyala = setelah beli, coin di-unstar supaya hilang dari watchlist (tidak terbeli lagi).' },
-        { k: 'unstarOnDryRun', t: 'bool', label: 'Unstar saat dry run', help: 'Saat dry run buy (klik Buy dilewati): nyala = coin tetap di-unstar, mati = coin dibiarkan di watchlist (bisa dites berulang).' },
+        { k: 'unstarAfterBuy', t: 'bool', label: 'Unstar setelah beli', help: 'Nyala = setelah beli, coin di-unstar supaya hilang dari watchlist (tidak terbeli lagi). Coin yang sudah dibeli juga otomatis dihapus dari daftar coin buy.' },
+        { k: 'unstarOnDryRun', t: 'bool', label: 'Unstar saat dry run', help: 'Saat dry run buy (klik Buy dilewati): nyala = coin tetap di-unstar, mati = coin dibiarkan di watchlist (bisa dites berulang). Aturan yang sama dipakai untuk menghapus coin dari daftar coin buy saat dry run.' },
         { k: 'standbyRandom', t: 'bool', label: 'Standby acak', help: 'Nyala = saat tidak ada yang dibeli, tab buy pindah ke detail coin watchlist yang dipilih acak (lebih natural).' }
       ]}
     ]
