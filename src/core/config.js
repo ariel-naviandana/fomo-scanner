@@ -47,8 +47,9 @@ const DEFAULTS = {
         viewport: null, // null = ikut ukuran jendela (maximize); isi { width, height } untuk ukuran tetap / headless
     },
     profileName: 'VagueCoralJay',  // nama profil fomo (cukup ubah ini)
-    // Halaman awal scan: detail coin apa saja (tanpa ?r=), posisi dibaca dari panel "Your positions"
-    startTokenUrl: 'https://fomo.family/tokens/base/0xcbada732173e39521cdbe8bf59a6dc85a9fc7b8c',
+    // Halaman awal kedua tab & login (tanpa ?r=). Bawaan: halaman discover, posisi dibaca dari panel "Your positions".
+    // Nama key startTokenUrl dipertahankan supaya config lama tetap terbaca; boleh juga diisi link detail coin.
+    startTokenUrl: 'https://fomo.family/discover',
     // Fitur yang dijalankan (config/general.json -> run). false = fitur dilewati total (beda dengan dry run)
     sellEnabled: true,
     adEnabled: true,
@@ -116,9 +117,9 @@ const DEFAULTS = {
         navTimeoutMs: 45000,
     },
     selectors: {
-        row: "(//a[@data-slot='hover-card-trigger'][contains(@href,'/tokens/')][.//div[contains(@class,'w-24')]])",
-        dustButton: "//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Show dust')]",
-        hideDustButton: "//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Hide dust')]",
+        row: "(//aside[.//*[normalize-space(text())='Your positions']]//a[@data-slot='hover-card-trigger'][contains(@href,'/tokens/')][.//div[contains(@class,'w-24')]])",
+        dustButton: "//aside[.//*[normalize-space(text())='Your positions']]//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Show dust')]",
+        hideDustButton: "//aside[.//*[normalize-space(text())='Your positions']]//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Hide dust')]",
         rowName: ".//div[contains(@class,'text-sm') and contains(@class,'truncate')]",
         rowValue: ".//div[contains(@class,'w-24')]",
         sellButton: "(//div[button[normalize-space(.)='Buy']]/button[normalize-space(.)='Sell'])[1]",

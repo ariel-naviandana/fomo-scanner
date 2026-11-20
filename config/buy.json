@@ -1,7 +1,7 @@
 {
   "unstarAfterBuy": true,
   "unstarOnDryRun": false,
-  "standbyRandom": true,
+  "standbyRandom": false,
   "coins": [
     {
       "name": "CONTOHCOIN",

@@ -130,7 +130,7 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
       ]},
       { title: 'Akun fomo', fields: [
         { k: 'profileName', t: 'text', label: 'Nama profil fomo', help: 'Dipakai sebagai ?r= di URL. Contoh VagueCoralJay.' },
-        { k: 'startTokenUrl', t: 'text', label: 'Halaman awal', help: 'Halaman detail coin apa saja (tanpa ?r=). Dipakai sebagai halaman awal kedua tab. Contoh https://fomo.family/tokens/base/0xcbada7...' }
+        { k: 'startTokenUrl', t: 'text', label: 'Halaman awal', help: 'Halaman awal kedua tab dan login (tanpa ?r=; ?r=profil ditambahkan otomatis). Bawaan https://fomo.family/discover. Link detail coin fomo juga boleh.' }
       ]}
     ],
     sellAd: [
@@ -376,7 +376,7 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
     if (String(g.restartMode) === 'random' && num(g.restartMinMin) < 1) errs.push('Restart acak: menit minimal harus >= 1.');
     if (String(g.restartMode) !== 'random' && !String(g.schedule || '').trim()) warns.push('Jadwal cron kosong: satu run jalan terus tanpa restart.');
     if (!String(g.profileName || '').trim()) errs.push('Nama profil fomo kosong.');
-    if (!/^https:\/\/fomo\.family\/tokens\//.test(String(g.startTokenUrl || ''))) warns.push('Halaman awal bukan link detail coin fomo (https://fomo.family/tokens/...).');
+    if (!/^https:\/\/fomo\.family\/(tokens\/|discover)/.test(String(g.startTokenUrl || ''))) warns.push('Halaman awal bukan halaman discover / detail coin fomo (https://fomo.family/discover atau /tokens/...).');
 
     var sellLive = get(g, 'run.sell') !== false && get(g, 'dryRun.sell') === false;
     var adLive = get(g, 'run.ad') !== false && get(g, 'dryRun.ad') === false;

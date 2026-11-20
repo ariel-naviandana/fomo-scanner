@@ -18,7 +18,7 @@
     "buy": true
   },
   "profileName": "VagueCoralJay",
-  "startTokenUrl": "https://fomo.family/tokens/base/0xcbada732173e39521cdbe8bf59a6dc85a9fc7b8c",
+  "startTokenUrl": "https://fomo.family/discover",
   "browser": {
     "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     "userDataDir": "C:\\chrome-profiles\\fomo-playwright",

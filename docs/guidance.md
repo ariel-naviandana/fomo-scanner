@@ -54,7 +54,7 @@ Dibaca dari folder project (atau folder exe). Kalau folder `config/` tidak ada, 
 | `dryRun.ad` | `true` = AD isi nominal tapi tidak klik Buy | `true` |
 | `dryRun.buy` | `true` = scanner buy isi nominal tapi tidak klik Buy (unstar diatur `unstarOnDryRun` di buy.json) | `true` |
 | `profileName` | Nama profil fomo, dipakai sebagai `?r=` di URL | `"VagueCoralJay"` |
-| `startTokenUrl` | Halaman awal: detail coin apa saja (tanpa `?r=`). Dipakai kedua tab | `"https://fomo.family/tokens/base/0xcbada7..."` |
+| `startTokenUrl` | Halaman awal kedua tab dan `login` (tanpa `?r=`, `?r=profil` ditambahkan otomatis). Bawaan halaman discover; link detail coin juga boleh | `"https://fomo.family/discover"` |
 | `browser.chromePath` | Lokasi chrome.exe | `"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"` |
 | `browser.userDataDir` | Folder profil Chrome khusus bot (sesi login fomo) | `"C:\\chrome-profiles\\fomo-playwright"` |
 | `browser.headless` | `true` = Chrome tanpa jendela | `false` |

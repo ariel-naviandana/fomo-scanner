@@ -1,8 +1,8 @@
 {
   "selectors": {
-    "row": "(//a[@data-slot='hover-card-trigger'][contains(@href,'/tokens/')][.//div[contains(@class,'w-24')]])",
-    "dustButton": "//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Show dust')]",
-    "hideDustButton": "//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Hide dust')]",
+    "row": "(//aside[.//*[normalize-space(text())='Your positions']]//a[@data-slot='hover-card-trigger'][contains(@href,'/tokens/')][.//div[contains(@class,'w-24')]])",
+    "dustButton": "//aside[.//*[normalize-space(text())='Your positions']]//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Show dust')]",
+    "hideDustButton": "//aside[.//*[normalize-space(text())='Your positions']]//button[@data-slot='accordion-trigger'][starts-with(normalize-space(.),'Hide dust')]",
     "rowName": ".//div[contains(@class,'text-sm') and contains(@class,'truncate')]",
     "rowValue": ".//div[contains(@class,'w-24')]",
     "sellButton": "(//div[button[normalize-space(.)='Buy']]/button[normalize-space(.)='Sell'])[1]",
