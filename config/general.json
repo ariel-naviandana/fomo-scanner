@@ -32,7 +32,9 @@
     "adLogFile": "fomo_ad_log.csv",
     "sellLogFile": "fomo_sell_log.csv",
     "trailFile": "fomo_trail.csv",
-    "buyLogFile": "fomo_buy_log.csv"
+    "buyLogFile": "fomo_buy_log.csv",
+    "terminalLog": true,
+    "terminalLogPrefix": "fomo_log"
   },
   "uiPort": 3939
 }

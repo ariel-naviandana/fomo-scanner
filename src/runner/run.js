@@ -18,8 +18,10 @@ const { FomoScanner } = require('../sell-ad/scanner');
 const { BuyScanner } = require('../buy/buyer');
 const { createScheduler } = require('./schedule');
 const { watchConfig } = require('./watch-config');
+const { setLogDir } = require('../core/file-log');
 
 let cfg = loadPwConfig();
+setLogDir(cfg.output.dir, { enabled: cfg.output.terminalLog, prefix: cfg.output.terminalLogPrefix });
 const sellAdEnabled = () => cfg.sellEnabled !== false || cfg.adEnabled !== false;
 
 // startRun dideklarasikan di bawah (function hoisting), dipanggil saat jadwal tiba
@@ -152,6 +154,7 @@ async function onConfigChange() {
         return;
     }
     cfg = next;
+    setLogDir(cfg.output.dir, { enabled: cfg.output.terminalLog, prefix: cfg.output.terminalLogPrefix });
     printSummary();
     scheduler.setup();
     while (busy) await sleep(1000); // tunggu pergantian run lain selesai

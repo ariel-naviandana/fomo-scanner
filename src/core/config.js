@@ -102,6 +102,8 @@ const DEFAULTS = {
         sellLogFile: 'fomo_sell_log.csv',
         trailFile: 'fomo_trail.csv',
         buyLogFile: 'fomo_buy_log.csv',      // puncak margin trailing stop per coin
+        terminalLog: true,                   // log terminal ikut disimpan ke CSV harian
+        terminalLogPrefix: 'fomo_log',       // nama file: <prefix>_YYYY-MM-DD.csv
     },
     wait: {
         startLoadMs: 5000,  // tunggu halaman awal termuat

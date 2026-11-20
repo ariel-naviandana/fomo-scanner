@@ -61,6 +61,8 @@ Dibaca dari folder project (atau folder exe). Kalau folder `config/` tidak ada, 
 | `browser.viewport` | `null` = halaman ikut ukuran jendela (maximize). Isi ukuran untuk ukuran tetap | `null` atau `{ "width": 1600, "height": 1000 }` |
 | `output.dir` | Folder log CSV | `"C:\\uivision\\datasources"` |
 | `output.positionsFile` / `adLogFile` / `sellLogFile` / `trailFile` / `buyLogFile` | Nama file log posisi / AD / sell / puncak trailing / buy | `"fomo_buy_log.csv"` |
+| `output.terminalLog` | `true` = semua log terminal ikut disimpan ke CSV harian di `output.dir` | `true` |
+| `output.terminalLogPrefix` | Awal nama file log terminal: `<prefix>_YYYY-MM-DD.csv` | `"fomo_log"` |
 
 ### `config/sell-ad.json`: sell dan AD (tab 1)
 | Key | Arti | Contoh |
@@ -146,5 +148,6 @@ Kalau tombol Buy berubah jadi "Insufficient balance" (saldo tidak cukup), AD dib
 - `fomo_positions.csv`: waktu, nama, nominal, margin
 - `fomo_sell_log.csv`: waktu, nama, nominal, margin, hasil (DRY_RUN_STOP / SOLD / SELL_GAGAL / MISMATCH / CLICK_GAGAL / SELL_MIN_ORDER)
 - `fomo_ad_log.csv`: waktu, nama, umur(jam), rsi, mc sekarang, mc avg entry, invested, hasil (LOLOS / TIDAK_LOLOS:... / DRY_RUN_STOP / BOUGHT / BUY_GAGAL / BUY_MISMATCH / BUY_MIN_ORDER / BUY_SALDO_KURANG / CLICK_GAGAL / POPUP_MISMATCH), rentang MC baris `adCoins` yang dipakai
+- `fomo_log_YYYY-MM-DD.csv` (log terminal, satu file per hari): ts, tag (mis. BUY), level (info / ok / warn / err), message
 - `fomo_buy_log.csv`: waktu, nama, mcap sidebar, mcap detail, mcapMin, mcapMax, nominal, hasil (MCAP_TIDAK_COCOK / DRY_RUN_STOP / DRY_RUN_STOP_UNSTAR_GAGAL / BOUGHT / BOUGHT_UNSTAR_GAGAL / BUY_GAGAL / BUY_MISMATCH / BUY_MIN_ORDER / BUY_SALDO_KURANG / CLICK_GAGAL / DETAIL_MISMATCH)
 - `fomo_trail.csv`: waktu, link coin, nama, puncak margin (`RESET` setelah SOLD atau AD BOUGHT). Dipakai trailing stop supaya puncak tetap tersimpan walau run/Chrome di-restart. Hapus file ini untuk reset semua puncak.
